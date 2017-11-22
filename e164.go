@@ -15,11 +15,17 @@ func ParseE164(s string) (m E164, e error) {
 }
 
 func (m E164) String() string {
+	if m.tbcd == nil {
+		return ""
+	}
 	return m.tbcd.String()
 }
 
 // Bytes returns TBCD format byte data
 func (m E164) Bytes() []byte {
+	if m.tbcd == nil {
+		return []byte{}
+	}
 	r := make([]byte, len(m.tbcd))
 	copy(r, m.tbcd)
 	return r
@@ -37,5 +43,8 @@ func ToE164(b []byte) (m E164, e error) {
 
 // Length of this E164
 func (m E164) Length() int {
+	if m.tbcd == nil {
+		return 0
+	}
 	return m.tbcd.Length()
 }

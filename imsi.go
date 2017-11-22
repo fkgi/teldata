@@ -29,15 +29,24 @@ func (i IMSI) Length() int {
 
 // MCC value of this IMSI
 func (i IMSI) MCC() string {
+	if len(i.string) < 3 {
+		return ""
+	}
 	return i.string[0:3]
 }
 
 // MNC2 return 2 charactor MNC value of this IMSI
 func (i IMSI) MNC2() string {
+	if len(i.string) < 5 {
+		return ""
+	}
 	return i.string[3:5]
 }
 
 // MNC3 return 2 charactor MNC value of this IMSI
 func (i IMSI) MNC3() string {
+	if len(i.string) < 6 {
+		return ""
+	}
 	return i.string[3:6]
 }
