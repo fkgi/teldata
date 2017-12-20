@@ -26,8 +26,8 @@ func (m E164) Bytes() []byte {
 	return r
 }
 
-// ToE164 makes E164 from this TBCD value
-func ToE164(b []byte) (m E164, e error) {
+// B2E164 makes E164 from this TBCD value
+func B2E164(b []byte) (m E164, e error) {
 	m = make([]byte, len(b))
 	copy(m, b)
 	if m.Length() > 15 {
