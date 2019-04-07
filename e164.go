@@ -16,11 +16,17 @@ func ParseE164(s string) (m E164, e error) {
 }
 
 func (m E164) String() string {
+	if m == nil {
+		return "<nil>"
+	}
 	return TBCD(m).String()
 }
 
 // Bytes returns TBCD format byte data
 func (m E164) Bytes() []byte {
+	if m == nil {
+		return nil
+	}
 	r := make([]byte, len(m))
 	copy(r, m)
 	return r
@@ -47,13 +53,13 @@ func (m E164) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON provide custom marshaller
-func (m *E164) UnmarshalJSON(b []byte) (e error) {
+func (m E164) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
 		return e
 	}
 	if len(s) != 0 {
-		*m, e = ParseE164(s)
+		m, e = ParseE164(s)
 	}
 	return e
 }

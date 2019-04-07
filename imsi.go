@@ -48,13 +48,13 @@ func (i IMSI) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON provide custom marshaller
-func (i *IMSI) UnmarshalJSON(b []byte) (e error) {
+func (i IMSI) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
 		return e
 	}
 	if len(s) != 0 {
-		*i, e = ParseIMSI(s)
+		i, e = ParseIMSI(s)
 	}
 	return e
 }

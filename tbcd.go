@@ -2,6 +2,7 @@ package teldata
 
 import (
 	"bytes"
+	"encoding/json"
 	"strings"
 )
 
@@ -125,4 +126,21 @@ func (t TBCD) String() string {
 // Bytes return byte data
 func (t TBCD) Bytes() []byte {
 	return []byte(t)
+}
+
+// MarshalJSON provide custom marshaller
+func (t TBCD) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.String())
+}
+
+// UnmarshalJSON provide custom marshaller
+func (t TBCD) UnmarshalJSON(b []byte) (e error) {
+	var s string
+	if e = json.Unmarshal(b, &s); e != nil {
+		return e
+	}
+	if len(s) != 0 {
+		t, e = ParseTBCD(s)
+	}
+	return e
 }
