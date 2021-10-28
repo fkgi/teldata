@@ -1,4 +1,10 @@
 # teldata
 General data format for telecommunication.
-# License
-BSD 3-Clause
+
+Below format are provided.
+* E.164
+* TBCD
+* IMSI
+
+## License
+MIT
