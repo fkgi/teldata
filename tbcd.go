@@ -80,6 +80,25 @@ func ParseTBCD(s string) (TBCD, error) {
 	return r, nil
 }
 
+// NewTBCD create TBCD value from byte slice
+func NewTBCD(b []byte) (TBCD, error) {
+	for i := range b[:len(b)-1] {
+		if b[i]&0xf0 == 0xf0 || b[i]&0x0f == 0x0f {
+			return nil, &InvalidDataError{
+				Name:  "TBCD",
+				Bytes: b}
+		}
+	}
+	if b[len(b)-1]&0x0f == 0x0f {
+		return nil, &InvalidDataError{
+			Name:  "TBCD",
+			Bytes: b}
+	}
+	t := make([]byte, len(b))
+	copy(t, b)
+	return t, nil
+}
+
 // Length return length of the TBCD digit
 func (t TBCD) Length() int {
 	ret := len(t) * 2
@@ -137,7 +156,9 @@ func (t TBCD) String() string {
 
 // Bytes return byte data
 func (t TBCD) Bytes() []byte {
-	return []byte(t)
+	ret := make([]byte, len(t))
+	copy(ret, t)
+	return ret
 }
 
 // MarshalJSON provide custom marshaller
