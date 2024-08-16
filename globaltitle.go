@@ -1,5 +1,9 @@
 package teldata
 
+import (
+	"fmt"
+)
+
 /*
 GlobalTitle is an address used in the SCCP protocol for routing
 signaling messages on telecommunications networks.
@@ -10,10 +14,49 @@ type GlobalTitle struct {
 	Digits TBCD
 }
 
+func (gt *GlobalTitle) String() string {
+	return fmt.Sprintf("%s(NA=%s, NP=%s)",
+		gt.Digits, gt.NatureOfAddress, gt.NumberingPlan)
+}
+
 /*
 NumberingPlan parameter for global title.
 */
 type NumberingPlan byte
+
+func (np NumberingPlan) String() string {
+	switch np {
+	case NP_Unknown:
+		return "unknown"
+	case NP_ISDNTelephony:
+		return "ISDN/Telephony"
+	case NP_Generic:
+		return "generic"
+	case NP_Data:
+		return "data"
+	case NP_Telex:
+		return "telex"
+	case NP_MaritimeMobile:
+		return "maritime mobile"
+	case NP_LandMobile:
+		return "land mobile"
+	case NP_ISDNMobile:
+		return "ISDN/mobile"
+	case NP_National:
+		return "MAP national"
+	case NP_Private:
+		return "MAP private"
+	case NP_ERMES:
+		return "european radio messaging system"
+	case NP_Internal:
+		return "Internet IP"
+	case NP_NetworkSpecific:
+		return "private network or network-specific"
+	case NP_WAP:
+		return "WAP Client Id"
+	}
+	return fmt.Sprintf("undefined(%d)", np)
+}
 
 const (
 	NP_Unknown         NumberingPlan = 0x00 // unknown
@@ -36,6 +79,26 @@ const (
 NatureOfAddress parameter for global title.
 */
 type NatureOfAddress byte
+
+func (na NatureOfAddress) String() string {
+	switch na {
+	case NA_Unknown:
+		return "unknown"
+	case NA_International:
+		return "international number"
+	case NA_National:
+		return "national significant number"
+	case NA_NetworkSpecific:
+		return "reserved for national use"
+	case NA_Subscriber:
+		return "subscriber number"
+	case NA_Alphanumeric:
+		return "apphanumeric address"
+	case NA_Abbreviated:
+		return "abbreviated (spped dial) number"
+	}
+	return fmt.Sprintf("undefined(%d)", na)
+}
 
 const (
 	NA_Unknown         NatureOfAddress = 0x00 // unknown
