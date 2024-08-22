@@ -1,6 +1,7 @@
 package teldata
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -19,6 +20,79 @@ func (gt *GlobalTitle) String() string {
 		gt.Digits, gt.NatureOfAddress, gt.NumberingPlan)
 }
 
+func (gt GlobalTitle) MarshalJSON() ([]byte, error) {
+	tmp := struct {
+		NA  string `json:"na"`
+		NP  string `json:"np"`
+		Dig string `json:"digits"`
+	}{
+		gt.NatureOfAddress.String(),
+		gt.NumberingPlan.String(),
+		gt.Digits.String(),
+	}
+	return json.Marshal(tmp)
+}
+
+func (gt *GlobalTitle) UnmarshalJSON(b []byte) (e error) {
+	tmp := struct {
+		NA  string `json:"na"`
+		NP  string `json:"np"`
+		Dig string `json:"digits"`
+	}{}
+	if e = json.Unmarshal(b, &tmp); e != nil {
+		return e
+	}
+	switch tmp.NA {
+	case "unknown":
+		gt.NatureOfAddress = NA_Unknown
+	case "international":
+		gt.NatureOfAddress = NA_International
+	case "national":
+		gt.NatureOfAddress = NA_National
+	case "networkspecific":
+		gt.NatureOfAddress = NA_NetworkSpecific
+	case "subscriber":
+		gt.NatureOfAddress = NA_Subscriber
+	case "alphanumeric":
+		gt.NatureOfAddress = NA_Alphanumeric
+	case "abbreviated":
+		gt.NatureOfAddress = NA_Abbreviated
+	}
+	switch tmp.NP {
+	case "unknown":
+		gt.NumberingPlan = NP_Unknown
+	case "telephony":
+		gt.NumberingPlan = NP_ISDNTelephony
+	case "generic":
+		gt.NumberingPlan = NP_Generic
+	case "data":
+		gt.NumberingPlan = NP_Data
+	case "telex":
+		gt.NumberingPlan = NP_Telex
+	case "maritime":
+		gt.NumberingPlan = NP_MaritimeMobile
+	case "land":
+		gt.NumberingPlan = NP_LandMobile
+	case "mobile":
+		gt.NumberingPlan = NP_ISDNMobile
+	case "national":
+		gt.NumberingPlan = NP_National
+	case "private":
+		gt.NumberingPlan = NP_Private
+	case "ermes":
+		gt.NumberingPlan = NP_ERMES
+	case "internet":
+		gt.NumberingPlan = NP_Internet
+	case "nwspecific":
+		gt.NumberingPlan = NP_NetworkSpecific
+	case "wap":
+		gt.NumberingPlan = NP_WAP
+
+	}
+	gt.Digits, e = ParseTBCD(tmp.Dig)
+	return e
+}
+
 /*
 NumberingPlan parameter for global title.
 */
@@ -29,7 +103,7 @@ func (np NumberingPlan) String() string {
 	case NP_Unknown:
 		return "unknown"
 	case NP_ISDNTelephony:
-		return "ISDN/Telephony"
+		return "telephony"
 	case NP_Generic:
 		return "generic"
 	case NP_Data:
@@ -37,23 +111,23 @@ func (np NumberingPlan) String() string {
 	case NP_Telex:
 		return "telex"
 	case NP_MaritimeMobile:
-		return "maritime mobile"
+		return "maritime"
 	case NP_LandMobile:
-		return "land mobile"
+		return "land"
 	case NP_ISDNMobile:
-		return "ISDN/mobile"
+		return "mobile"
 	case NP_National:
-		return "MAP national"
+		return "national"
 	case NP_Private:
-		return "MAP private"
+		return "private"
 	case NP_ERMES:
-		return "european radio messaging system"
-	case NP_Internal:
-		return "Internet IP"
+		return "ermes"
+	case NP_Internet:
+		return "internet"
 	case NP_NetworkSpecific:
-		return "private network or network-specific"
+		return "nwspecific"
 	case NP_WAP:
-		return "WAP Client Id"
+		return "wap"
 	}
 	return fmt.Sprintf("undefined(%d)", np)
 }
@@ -70,7 +144,7 @@ const (
 	NP_National        NumberingPlan = 0x08 // national (MAP spec.)
 	NP_Private         NumberingPlan = 0x09 // private (MAP spec.)
 	NP_ERMES           NumberingPlan = 0x0a // european radio messaging system (ETSI DE/PS 3 01-3 spec.)
-	NP_Internal        NumberingPlan = 0x0d // Internet IP
+	NP_Internet        NumberingPlan = 0x0d // Internet IP
 	NP_NetworkSpecific NumberingPlan = 0x0e // private network or network-specific
 	NP_WAP             NumberingPlan = 0x12 // WAP Client Id
 )
@@ -85,17 +159,17 @@ func (na NatureOfAddress) String() string {
 	case NA_Unknown:
 		return "unknown"
 	case NA_International:
-		return "international number"
+		return "international"
 	case NA_National:
-		return "national significant number"
+		return "national"
 	case NA_NetworkSpecific:
-		return "reserved for national use"
+		return "networkspecific"
 	case NA_Subscriber:
-		return "subscriber number"
+		return "subscriber"
 	case NA_Alphanumeric:
-		return "apphanumeric address"
+		return "alphanumeric"
 	case NA_Abbreviated:
-		return "abbreviated (spped dial) number"
+		return "abbreviated"
 	}
 	return fmt.Sprintf("undefined(%d)", na)
 }
@@ -106,6 +180,6 @@ const (
 	NA_National        NatureOfAddress = 0x02 // national significant number
 	NA_NetworkSpecific NatureOfAddress = 0x03 // reserved for national use (network specific number in MAP spec.)
 	NA_Subscriber      NatureOfAddress = 0x04 // subscriber number
-	NA_Alphanumeric    NatureOfAddress = 0x05 // apphanumeric address
-	NA_Abbreviated     NatureOfAddress = 0x06 // abbreviated (spped dial) number
+	NA_Alphanumeric    NatureOfAddress = 0x05 // alphanumeric address
+	NA_Abbreviated     NatureOfAddress = 0x06 // abbreviated (speed dial) number
 )
