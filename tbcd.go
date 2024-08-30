@@ -167,13 +167,13 @@ func (t TBCD) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON provide custom marshaller
-func (t TBCD) UnmarshalJSON(b []byte) (e error) {
+func (t *TBCD) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
 		return e
 	}
 	if len(s) != 0 {
-		t, e = ParseTBCD(s)
+		*t, e = ParseTBCD(s)
 	}
 	return e
 }

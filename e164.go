@@ -53,13 +53,13 @@ func (m E164) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON provide custom marshaller
-func (m E164) UnmarshalJSON(b []byte) (e error) {
+func (m *E164) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
 		return e
 	}
 	if len(s) != 0 {
-		m, e = ParseE164(s)
+		*m, e = ParseE164(s)
 	}
 	return e
 }
