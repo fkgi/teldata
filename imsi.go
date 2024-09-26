@@ -22,6 +22,10 @@ func (i IMSI) String() string {
 	return string(i)
 }
 
+func (i IMSI) IsEmpty() bool {
+	return len(i) < 5 || len(i) > 15
+}
+
 // Bytes returns TBCD format byte data
 func (i IMSI) Bytes() []byte {
 	t, e := ParseTBCD(string(i))
@@ -31,8 +35,8 @@ func (i IMSI) Bytes() []byte {
 	return []byte(t)
 }
 
-// B2IMSI makes IMSI from this TBCD value
-func B2IMSI(b []byte) (m IMSI, e error) {
+// DecodeIMSI makes IMSI from this TBCD value
+func DecodeIMSI(b []byte) (m IMSI, e error) {
 	s := TBCD(b).String()
 	return ParseIMSI(s)
 }

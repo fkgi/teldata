@@ -10,9 +10,9 @@ GlobalTitle is an address used in the SCCP protocol for routing
 signaling messages on telecommunications networks.
 */
 type GlobalTitle struct {
-	NatureOfAddress
-	NumberingPlan
-	Digits TBCD
+	NatureOfAddress `json:"na"`
+	NumberingPlan   `json:"np"`
+	Digits          TBCD `json:"digits"`
 }
 
 func (gt *GlobalTitle) String() string {
@@ -20,77 +20,22 @@ func (gt *GlobalTitle) String() string {
 		gt.Digits, gt.NatureOfAddress, gt.NumberingPlan)
 }
 
-func (gt GlobalTitle) MarshalJSON() ([]byte, error) {
-	tmp := struct {
-		NA  string `json:"na"`
-		NP  string `json:"np"`
-		Dig string `json:"digits"`
-	}{
-		gt.NatureOfAddress.String(),
-		gt.NumberingPlan.String(),
-		gt.Digits.String(),
-	}
-	return json.Marshal(tmp)
+func (gt *GlobalTitle) Bytes() []byte {
+	return append(
+		[]byte{0x80 | byte(gt.NatureOfAddress<<4) | byte(gt.NumberingPlan)},
+		gt.Digits.Bytes()...)
 }
 
-func (gt *GlobalTitle) UnmarshalJSON(b []byte) (e error) {
-	tmp := struct {
-		NA  string `json:"na"`
-		NP  string `json:"np"`
-		Dig string `json:"digits"`
-	}{}
-	if e = json.Unmarshal(b, &tmp); e != nil {
-		return e
+func DecodeGlobalTitle(data []byte) (a GlobalTitle, e error) {
+	if len(data) == 0 {
+		e = InvalidDataError{Name: "global title", Bytes: data}
+	} else {
+		a.NatureOfAddress = NatureOfAddress(data[0]&0x70) >> 4
+		a.NumberingPlan = NumberingPlan(data[0] & 0x0f)
+		a.Digits = make(TBCD, len(data)-1)
+		copy(a.Digits, data[1:])
 	}
-	switch tmp.NA {
-	case "unknown":
-		gt.NatureOfAddress = NA_Unknown
-	case "international":
-		gt.NatureOfAddress = NA_International
-	case "national":
-		gt.NatureOfAddress = NA_National
-	case "networkspecific":
-		gt.NatureOfAddress = NA_NetworkSpecific
-	case "subscriber":
-		gt.NatureOfAddress = NA_Subscriber
-	case "alphanumeric":
-		gt.NatureOfAddress = NA_Alphanumeric
-	case "abbreviated":
-		gt.NatureOfAddress = NA_Abbreviated
-	}
-	switch tmp.NP {
-	case "unknown":
-		gt.NumberingPlan = NP_Unknown
-	case "telephony":
-		gt.NumberingPlan = NP_ISDNTelephony
-	case "generic":
-		gt.NumberingPlan = NP_Generic
-	case "data":
-		gt.NumberingPlan = NP_Data
-	case "telex":
-		gt.NumberingPlan = NP_Telex
-	case "maritime":
-		gt.NumberingPlan = NP_MaritimeMobile
-	case "land":
-		gt.NumberingPlan = NP_LandMobile
-	case "mobile":
-		gt.NumberingPlan = NP_ISDNMobile
-	case "national":
-		gt.NumberingPlan = NP_National
-	case "private":
-		gt.NumberingPlan = NP_Private
-	case "ermes":
-		gt.NumberingPlan = NP_ERMES
-	case "internet":
-		gt.NumberingPlan = NP_Internet
-	case "nwspecific":
-		gt.NumberingPlan = NP_NetworkSpecific
-	case "wap":
-		gt.NumberingPlan = NP_WAP
-
-	}
-	gt.Digits, e = ParseTBCD(tmp.Dig)
-	return e
+	return
 }
 
 /*
@@ -130,6 +75,52 @@ func (np NumberingPlan) String() string {
 		return "wap"
 	}
 	return fmt.Sprintf("undefined(%d)", np)
+}
+
+// MarshalJSON provide custom marshaller
+func (np NumberingPlan) MarshalJSON() ([]byte, error) {
+	fmt.Println("hoge")
+	return json.Marshal(np.String())
+}
+
+// UnmarshalJSON provide custom marshaller
+func (np *NumberingPlan) UnmarshalJSON(b []byte) (e error) {
+	var s string
+	if e = json.Unmarshal(b, &s); e == nil {
+		switch s {
+		case "unknown":
+			*np = NP_Unknown
+		case "telephony":
+			*np = NP_ISDNTelephony
+		case "generic":
+			*np = NP_Generic
+		case "data":
+			*np = NP_Data
+		case "telex":
+			*np = NP_Telex
+		case "maritime":
+			*np = NP_MaritimeMobile
+		case "land":
+			*np = NP_LandMobile
+		case "mobile":
+			*np = NP_ISDNMobile
+		case "national":
+			*np = NP_National
+		case "private":
+			*np = NP_Private
+		case "ermes":
+			*np = NP_ERMES
+		case "internet":
+			*np = NP_Internet
+		case "nwspecific":
+			*np = NP_NetworkSpecific
+		case "wap":
+			*np = NP_WAP
+		default:
+			e = InvalidDataError{Name: "NP", Bytes: b}
+		}
+	}
+	return
 }
 
 const (
@@ -172,6 +163,37 @@ func (na NatureOfAddress) String() string {
 		return "abbreviated"
 	}
 	return fmt.Sprintf("undefined(%d)", na)
+}
+
+// MarshalJSON provide custom marshaller
+func (na NatureOfAddress) MarshalJSON() ([]byte, error) {
+	return json.Marshal(na.String())
+}
+
+// UnmarshalJSON provide custom marshaller
+func (na *NatureOfAddress) UnmarshalJSON(b []byte) (e error) {
+	var s string
+	if e = json.Unmarshal(b, &s); e == nil {
+		switch s {
+		case "unknown":
+			*na = NA_Unknown
+		case "international":
+			*na = NA_International
+		case "national":
+			*na = NA_National
+		case "networkspecific":
+			*na = NA_NetworkSpecific
+		case "subscriber":
+			*na = NA_Subscriber
+		case "alphanumeric":
+			*na = NA_Alphanumeric
+		case "abbreviated":
+			*na = NA_Abbreviated
+		default:
+			e = InvalidDataError{Name: "NoA", Bytes: b}
+		}
+	}
+	return
 }
 
 const (
