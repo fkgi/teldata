@@ -10,20 +10,24 @@ GlobalTitle is an address used in the SCCP protocol for routing
 signaling messages on telecommunications networks.
 */
 type GlobalTitle struct {
-	NatureOfAddress `json:"na"`
-	NumberingPlan   `json:"np"`
-	Digits          TBCD `json:"digits"`
+	NatureOfAddress NatureOfAddress `json:"na"`
+	NumberingPlan   NumberingPlan   `json:"np"`
+	Digits          TBCD            `json:"digits"`
 }
 
-func (gt *GlobalTitle) String() string {
-	return fmt.Sprintf("%s(NA=%s, NP=%s)",
+func (gt GlobalTitle) String() string {
+	return fmt.Sprintf("%s (NA=%s, NP=%s)",
 		gt.Digits, gt.NatureOfAddress, gt.NumberingPlan)
 }
 
-func (gt *GlobalTitle) Bytes() []byte {
+func (gt GlobalTitle) Bytes() []byte {
 	return append(
 		[]byte{0x80 | byte(gt.NatureOfAddress<<4) | byte(gt.NumberingPlan)},
 		gt.Digits.Bytes()...)
+}
+
+func (gt GlobalTitle) IsEmpty() bool {
+	return gt.Digits.Length() == 0
 }
 
 func DecodeGlobalTitle(data []byte) (a GlobalTitle, e error) {
@@ -45,33 +49,33 @@ type NumberingPlan byte
 
 func (np NumberingPlan) String() string {
 	switch np {
-	case NP_Unknown:
+	case UnknownNP:
 		return "unknown"
-	case NP_ISDNTelephony:
+	case ISDNTelephony:
 		return "telephony"
-	case NP_Generic:
+	case Generic:
 		return "generic"
-	case NP_Data:
+	case Data:
 		return "data"
-	case NP_Telex:
+	case Telex:
 		return "telex"
-	case NP_MaritimeMobile:
+	case MaritimeMobile:
 		return "maritime"
-	case NP_LandMobile:
+	case LandMobile:
 		return "land"
-	case NP_ISDNMobile:
+	case ISDNMobile:
 		return "mobile"
-	case NP_National:
+	case National:
 		return "national"
-	case NP_Private:
+	case Private:
 		return "private"
-	case NP_ERMES:
+	case ERMES:
 		return "ermes"
-	case NP_Internet:
+	case Internet:
 		return "internet"
-	case NP_NetworkSpecific:
+	case NetworkSpecificPlan:
 		return "nwspecific"
-	case NP_WAP:
+	case WAP:
 		return "wap"
 	}
 	return fmt.Sprintf("undefined(%d)", np)
@@ -79,7 +83,6 @@ func (np NumberingPlan) String() string {
 
 // MarshalJSON provide custom marshaller
 func (np NumberingPlan) MarshalJSON() ([]byte, error) {
-	fmt.Println("hoge")
 	return json.Marshal(np.String())
 }
 
@@ -89,33 +92,33 @@ func (np *NumberingPlan) UnmarshalJSON(b []byte) (e error) {
 	if e = json.Unmarshal(b, &s); e == nil {
 		switch s {
 		case "unknown":
-			*np = NP_Unknown
+			*np = UnknownNP
 		case "telephony":
-			*np = NP_ISDNTelephony
+			*np = ISDNTelephony
 		case "generic":
-			*np = NP_Generic
+			*np = Generic
 		case "data":
-			*np = NP_Data
+			*np = Data
 		case "telex":
-			*np = NP_Telex
+			*np = Telex
 		case "maritime":
-			*np = NP_MaritimeMobile
+			*np = MaritimeMobile
 		case "land":
-			*np = NP_LandMobile
+			*np = LandMobile
 		case "mobile":
-			*np = NP_ISDNMobile
+			*np = ISDNMobile
 		case "national":
-			*np = NP_National
+			*np = National
 		case "private":
-			*np = NP_Private
+			*np = Private
 		case "ermes":
-			*np = NP_ERMES
+			*np = ERMES
 		case "internet":
-			*np = NP_Internet
+			*np = Internet
 		case "nwspecific":
-			*np = NP_NetworkSpecific
+			*np = NetworkSpecificPlan
 		case "wap":
-			*np = NP_WAP
+			*np = WAP
 		default:
 			e = InvalidDataError{Name: "NP", Bytes: b}
 		}
@@ -124,20 +127,20 @@ func (np *NumberingPlan) UnmarshalJSON(b []byte) (e error) {
 }
 
 const (
-	NP_Unknown         NumberingPlan = 0x00 // unknown
-	NP_ISDNTelephony   NumberingPlan = 0x01 // ISDN/telephony (ITU-T E.163 and E.164)
-	NP_Generic         NumberingPlan = 0x02 // generic
-	NP_Data            NumberingPlan = 0x03 // data (ITU-T X.121)
-	NP_Telex           NumberingPlan = 0x04 // telex (ITU-T F.69)
-	NP_MaritimeMobile  NumberingPlan = 0x05 // maritime mobile (ITU-T E.210, E.211)
-	NP_LandMobile      NumberingPlan = 0x06 // land mobile (ITU-T E.212)
-	NP_ISDNMobile      NumberingPlan = 0x07 // ISDN/mobile (ITU-T E.214)
-	NP_National        NumberingPlan = 0x08 // national (MAP spec.)
-	NP_Private         NumberingPlan = 0x09 // private (MAP spec.)
-	NP_ERMES           NumberingPlan = 0x0a // european radio messaging system (ETSI DE/PS 3 01-3 spec.)
-	NP_Internet        NumberingPlan = 0x0d // Internet IP
-	NP_NetworkSpecific NumberingPlan = 0x0e // private network or network-specific
-	NP_WAP             NumberingPlan = 0x12 // WAP Client Id
+	UnknownNP           NumberingPlan = 0x00 // unknown
+	ISDNTelephony       NumberingPlan = 0x01 // ISDN/telephony (ITU-T E.163 and E.164)
+	Generic             NumberingPlan = 0x02 // generic
+	Data                NumberingPlan = 0x03 // data (ITU-T X.121)
+	Telex               NumberingPlan = 0x04 // telex (ITU-T F.69)
+	MaritimeMobile      NumberingPlan = 0x05 // maritime mobile (ITU-T E.210, E.211)
+	LandMobile          NumberingPlan = 0x06 // land mobile (ITU-T E.212)
+	ISDNMobile          NumberingPlan = 0x07 // ISDN/mobile (ITU-T E.214)
+	National            NumberingPlan = 0x08 // national (MAP spec.)
+	Private             NumberingPlan = 0x09 // private (MAP spec.)
+	ERMES               NumberingPlan = 0x0a // european radio messaging system (ETSI DE/PS 3 01-3 spec.)
+	Internet            NumberingPlan = 0x0d // Internet IP
+	NetworkSpecificPlan NumberingPlan = 0x0e // private network or network-specific
+	WAP                 NumberingPlan = 0x12 // WAP Client Id
 )
 
 /*
@@ -147,19 +150,19 @@ type NatureOfAddress byte
 
 func (na NatureOfAddress) String() string {
 	switch na {
-	case NA_Unknown:
+	case UnknownNA:
 		return "unknown"
-	case NA_International:
+	case International:
 		return "international"
-	case NA_National:
+	case NationalSignificant:
 		return "national"
-	case NA_NetworkSpecific:
-		return "networkspecific"
-	case NA_Subscriber:
+	case NetworkSpecific:
+		return "nwspecific"
+	case Subscriber:
 		return "subscriber"
-	case NA_Alphanumeric:
+	case Alphanumeric:
 		return "alphanumeric"
-	case NA_Abbreviated:
+	case Abbreviated:
 		return "abbreviated"
 	}
 	return fmt.Sprintf("undefined(%d)", na)
@@ -176,19 +179,19 @@ func (na *NatureOfAddress) UnmarshalJSON(b []byte) (e error) {
 	if e = json.Unmarshal(b, &s); e == nil {
 		switch s {
 		case "unknown":
-			*na = NA_Unknown
+			*na = UnknownNA
 		case "international":
-			*na = NA_International
+			*na = International
 		case "national":
-			*na = NA_National
-		case "networkspecific":
-			*na = NA_NetworkSpecific
+			*na = NationalSignificant
+		case "nwspecific":
+			*na = NetworkSpecific
 		case "subscriber":
-			*na = NA_Subscriber
+			*na = Subscriber
 		case "alphanumeric":
-			*na = NA_Alphanumeric
+			*na = Alphanumeric
 		case "abbreviated":
-			*na = NA_Abbreviated
+			*na = Abbreviated
 		default:
 			e = InvalidDataError{Name: "NoA", Bytes: b}
 		}
@@ -197,11 +200,11 @@ func (na *NatureOfAddress) UnmarshalJSON(b []byte) (e error) {
 }
 
 const (
-	NA_Unknown         NatureOfAddress = 0x00 // unknown
-	NA_International   NatureOfAddress = 0x01 // international number
-	NA_National        NatureOfAddress = 0x02 // national significant number
-	NA_NetworkSpecific NatureOfAddress = 0x03 // reserved for national use (network specific number in MAP spec.)
-	NA_Subscriber      NatureOfAddress = 0x04 // subscriber number
-	NA_Alphanumeric    NatureOfAddress = 0x05 // alphanumeric address
-	NA_Abbreviated     NatureOfAddress = 0x06 // abbreviated (speed dial) number
+	UnknownNA           NatureOfAddress = 0x00 // unknown
+	International       NatureOfAddress = 0x01 // international number
+	NationalSignificant NatureOfAddress = 0x02 // national significant number
+	NetworkSpecific     NatureOfAddress = 0x03 // reserved for national use (network specific number in MAP spec.)
+	Subscriber          NatureOfAddress = 0x04 // subscriber number
+	Alphanumeric        NatureOfAddress = 0x05 // alphanumeric address
+	Abbreviated         NatureOfAddress = 0x06 // abbreviated (speed dial) number
 )

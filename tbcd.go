@@ -110,6 +110,9 @@ func (t TBCD) Length() int {
 
 // String return string value of the TBCD digit
 func (t TBCD) String() string {
+	if len(t) == 0 {
+		return "N/A"
+	}
 	var b bytes.Buffer
 	so := [2]byte{}
 	for _, c := range t {
