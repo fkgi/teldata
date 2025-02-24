@@ -10,26 +10,29 @@ GlobalTitle is an address used in the SCCP protocol for routing
 signaling messages on telecommunications networks.
 */
 type GlobalTitle struct {
+	TranslationType uint8           `json:"tt"`
 	NatureOfAddress NatureOfAddress `json:"na"`
 	NumberingPlan   NumberingPlan   `json:"np"`
 	Digits          TBCD            `json:"digits"`
 }
 
 func (gt GlobalTitle) String() string {
-	return fmt.Sprintf("%s (NA=%s, NP=%s)",
-		gt.Digits, gt.NatureOfAddress, gt.NumberingPlan)
+	return fmt.Sprintf("%s (TT=%d NA=%s, NP=%s)",
+		gt.Digits, gt.TranslationType, gt.NatureOfAddress, gt.NumberingPlan)
 }
 
-func (gt GlobalTitle) Bytes() []byte {
-	return append(
-		[]byte{0x80 | byte(gt.NatureOfAddress<<4) | byte(gt.NumberingPlan)},
-		gt.Digits.Bytes()...)
-}
-
+/*
+	func (gt GlobalTitle) Bytes() []byte {
+		return append(
+			[]byte{0x80 | byte(gt.NatureOfAddress<<4) | byte(gt.NumberingPlan)},
+			gt.Digits.Bytes()...)
+	}
+*/
 func (gt GlobalTitle) IsEmpty() bool {
 	return gt.Digits.Length() == 0
 }
 
+/*
 func DecodeGlobalTitle(data []byte) (a GlobalTitle, e error) {
 	if len(data) == 0 {
 		e = InvalidDataError{Name: "global title", Bytes: data}
@@ -41,6 +44,7 @@ func DecodeGlobalTitle(data []byte) (a GlobalTitle, e error) {
 	}
 	return
 }
+*/
 
 /*
 NumberingPlan parameter for global title.
