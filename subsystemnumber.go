@@ -1,6 +1,9 @@
 package teldata
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
 
 type SubsystemNumber byte
 
@@ -35,20 +38,21 @@ func (n SubsystemNumber) MarshalJSON() ([]byte, error) {
 
 func (n *SubsystemNumber) UnmarshalJSON(b []byte) (e error) {
 	var s string
-	e = json.Unmarshal(b, &s)
-	switch s {
-	case "mgmn":
-		*n = SsnMgmt
-	case "hlr":
-		*n = SsnHLR
-	case "vlr":
-		*n = SsnVLR
-	case "msc":
-		*n = SsnMSC
-	case "eir":
-		*n = SsnEIR
-	default:
-		*n = 0
+	if e = json.Unmarshal(b, &s); e == nil {
+		switch s {
+		case "mgmt":
+			*n = SsnMgmt
+		case "hlr":
+			*n = SsnHLR
+		case "vlr":
+			*n = SsnVLR
+		case "msc":
+			*n = SsnMSC
+		case "eir":
+			*n = SsnEIR
+		default:
+			e = errors.New("unknown SSN")
+		}
 	}
 	return
 }

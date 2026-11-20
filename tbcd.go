@@ -82,6 +82,9 @@ func ParseTBCD(s string) (TBCD, error) {
 
 // NewTBCD create TBCD value from byte slice
 func NewTBCD(b []byte) (TBCD, error) {
+	if len(b) == 0 {
+		return []byte{}, nil
+	}
 	for i := range b[:len(b)-1] {
 		if b[i]&0xf0 == 0xf0 || b[i]&0x0f == 0x0f {
 			return nil, &InvalidDataError{
@@ -173,10 +176,10 @@ func (t TBCD) MarshalJSON() ([]byte, error) {
 func (t *TBCD) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
-		return e
-	}
-	if len(s) != 0 {
+	} else if len(s) == 0 {
+		*t = []byte{}
+	} else {
 		*t, e = ParseTBCD(s)
 	}
-	return e
+	return
 }

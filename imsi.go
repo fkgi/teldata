@@ -1,6 +1,8 @@
 package teldata
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // IMSI value
 type IMSI string
@@ -37,8 +39,11 @@ func (i IMSI) Bytes() []byte {
 
 // DecodeIMSI makes IMSI from this TBCD value
 func DecodeIMSI(b []byte) (m IMSI, e error) {
-	s := TBCD(b).String()
-	return ParseIMSI(s)
+	var t TBCD
+	if t, e = NewTBCD(b); e == nil {
+		m, e = ParseIMSI(t.String())
+	}
+	return
 }
 
 // Length of this IMSI
@@ -55,12 +60,12 @@ func (i IMSI) MarshalJSON() ([]byte, error) {
 func (i *IMSI) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
-		return e
-	}
-	if len(s) != 0 {
+	} else if len(s) == 0 {
+		*i = ""
+	} else {
 		*i, e = ParseIMSI(s)
 	}
-	return e
+	return
 }
 
 // MCC value of this IMSI

@@ -1,12 +1,21 @@
 package teldata
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // E164 value
 type E164 TBCD
 
 // ParseE164 makes E164 data from string
 func ParseE164(s string) (m E164, e error) {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			e = InvalidDataError{Name: "E164", Bytes: []byte(s)}
+			return
+		}
+	}
+
 	t, e := ParseTBCD(s)
 	if e == nil && t.Length() > 15 {
 		e = InvalidDataError{Name: "E164", Bytes: []byte(s)}
@@ -39,6 +48,15 @@ func B2E164(b []byte) (m E164, e error) {
 	if m.Length() > 15 {
 		e = InvalidDataError{Name: "E164", Bytes: b}
 	}
+	for i, d := range m {
+		if d&0x0f > 0x09 {
+			e = InvalidDataError{Name: "E164", Bytes: b}
+		}
+		if d < 0xa0 {
+		} else if i != len(m)-1 || d&0xf0 != 0xf0 {
+			e = InvalidDataError{Name: "E164", Bytes: b}
+		}
+	}
 	return
 }
 
@@ -56,10 +74,10 @@ func (m E164) MarshalJSON() ([]byte, error) {
 func (m *E164) UnmarshalJSON(b []byte) (e error) {
 	var s string
 	if e = json.Unmarshal(b, &s); e != nil {
-		return e
-	}
-	if len(s) != 0 {
+	} else if len(s) == 0 {
+		*m = []byte{}
+	} else {
 		*m, e = ParseE164(s)
 	}
-	return e
+	return
 }
