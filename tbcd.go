@@ -24,7 +24,7 @@ type TBCD []byte
 // ParseTBCD create TBCD value from string
 func ParseTBCD(s string) (TBCD, error) {
 	if strings.ContainsRune(s, '\x00') {
-		return nil, &InvalidDataError{
+		return nil, InvalidDataError{
 			Name:  "TBCD",
 			Bytes: []byte(s)}
 	} else if len(s)%2 != 0 {
@@ -68,7 +68,7 @@ func ParseTBCD(s string) (TBCD, error) {
 		case '\x00':
 			v = 0x0f
 		default:
-			return r, &InvalidDataError{
+			return r, InvalidDataError{
 				Name:  "TBCD",
 				Bytes: []byte(string(c))}
 		}
@@ -87,13 +87,13 @@ func NewTBCD(b []byte) (TBCD, error) {
 	}
 	for i := range b[:len(b)-1] {
 		if b[i]&0xf0 == 0xf0 || b[i]&0x0f == 0x0f {
-			return nil, &InvalidDataError{
+			return nil, InvalidDataError{
 				Name:  "TBCD",
 				Bytes: b}
 		}
 	}
 	if b[len(b)-1]&0x0f == 0x0f {
-		return nil, &InvalidDataError{
+		return nil, InvalidDataError{
 			Name:  "TBCD",
 			Bytes: b}
 	}
